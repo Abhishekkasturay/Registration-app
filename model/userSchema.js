@@ -25,49 +25,38 @@ const userSchema = new mongoose.Schema({
   ],
 });
 
-
-const hashPassword = async (user) => {
-  if (user.isModified("password")) {
-    const hashedPassword = await bcrypt.hash(user.password, 12);
-    user.password = hashedPassword;
-    user.cpassword = hashedPassword;
-  }
-};
-
-
+// Hash the password before saving
 userSchema.pre("save", async function (next) {
-  await hashPassword(this);
+  if (this.isModified("password")) {
+    this.password = await bcrypt.hash(this.password, 12);
+    this.cpassword = await bcrypt.hash(this.password, 12);
+  }
   next();
 });
 
-
-const generateAuthToken = async (user) => {
+// Generate JWT token
+userSchema.methods.generateAuthToken = async function () {
   try {
-    let token = jwt.sign({ _id: user._id }, process.env.SECRET_KEY);
-    user.tokens = user.tokens.concat({ token: token });
-    await user.save();
+    let token = jwt.sign({ _id: this._id }, process.env.SECRET_KEY);
+    this.tokens = this.tokens.concat({ token: token });
+    await this.save();
     return token;
   } catch (error) {
     console.log(error);
   }
 };
 
-
-const addMessage = async (user, name, email, phone, message) => {
+// Store messages in the database
+userSchema.methods.addMessage = async function (name, email, phone, message) {
   try {
-    user.messages = user.messages.concat({ name, email, phone, message });
-    await user.save();
-    return user.messages;
+    this.messages = this.messages.concat({ name, email, phone, message });
+    await this.save();
+    return this.messages;
   } catch (error) {
     console.log(error);
   }
 };
 
-
 const User = mongoose.model("users", userSchema);
 
-module.exports = {
-  User,
-  generateAuthToken,
-  addMessage,
-};
+module.exports = User;
