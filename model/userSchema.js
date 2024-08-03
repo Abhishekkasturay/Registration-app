@@ -25,7 +25,7 @@ const userSchema = new mongoose.Schema({
   ],
 });
 
-// Standalone function to hash the password
+// function to hash the password
 const hashPassword = async (user) => {
   if (user.isModified("password")) {
     const hashedPassword = await bcrypt.hash(user.password, 12);
@@ -40,7 +40,7 @@ userSchema.pre("save", async function (next) {
   next();
 });
 
-// Standalone function to generate JWT token
+// function to generate JWT token
 const generateAuthToken = async (user) => {
   try {
     let token = jwt.sign({ _id: user._id }, process.env.SECRET_KEY);
@@ -52,7 +52,7 @@ const generateAuthToken = async (user) => {
   }
 };
 
-// Standalone function to add a message
+// function to add a message
 const addMessage = async (user, name, email, phone, message) => {
   try {
     user.messages = user.messages.concat({ name, email, phone, message });
@@ -63,7 +63,6 @@ const addMessage = async (user, name, email, phone, message) => {
   }
 };
 
-// Export the standalone functions along with the model
 const User = mongoose.model("users", userSchema);
 
 module.exports = {
