@@ -1,8 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcryptjs");
-const User = require("../model/userSchema");
-const jwt = require("jsonwebtoken");
+const { User, generateAuthToken, addMessage } = require("../model/userSchema");
 const verifyToken = require("../middleware/verifyToken");
 
 // Using Async-Await for registration
@@ -47,7 +46,7 @@ router.post("/signin", async (req, res) => {
       const isMatch = await bcrypt.compare(password, userLogin.password);
 
       if (isMatch) {
-        const token = await userLogin.generateAuthToken();
+        const token = await generateAuthToken(userLogin); // Use standalone function
         res.json({ message: "User signed in successfully", jwtToken: token });
       } else {
         res.status(400).json({ message: "Invalid credentials" });
@@ -77,19 +76,13 @@ router.post("/contact", verifyToken, async (req, res) => {
 
     if (!name || !email || !phone || !message) {
       console.log("Error in the contact form");
-      res.json({ error: "Please fill in the contact form" });
+      return res.json({ error: "Please fill in the contact form" });
     }
 
     const userContact = await User.findOne({ _id: req.userId });
 
     if (userContact) {
-      const userMessage = await userContact.addMessage(
-        name,
-        email,
-        phone,
-        message
-      );
-      await userContact.save();
+      await addMessage(userContact, name, email, phone, message); // Use standalone function
       res.status(201).json({ message: "User contacted successfully" });
     }
   } catch (error) {
