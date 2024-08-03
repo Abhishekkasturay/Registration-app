@@ -46,7 +46,7 @@ router.post("/signin", async (req, res) => {
       const isMatch = await bcrypt.compare(password, userLogin.password);
 
       if (isMatch) {
-        const token = await generateAuthToken(userLogin); // Use standalone function
+        const token = await generateAuthToken(userLogin); 
         res.json({ message: "User signed in successfully", jwtToken: token });
       } else {
         res.status(400).json({ message: "Invalid credentials" });
