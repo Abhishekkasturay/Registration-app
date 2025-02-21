@@ -69,13 +69,6 @@ router.get("/getdata", verifyToken, (req, res) => {
   res.send(req.rootUser);
 });
 
-// Contact Page
-const express = require("express");
-const router = express.Router();
-const bcrypt = require("bcryptjs");
-const { User, generateAuthToken, addMessage } = require("../model/userSchema");
-const verifyToken = require("../middleware/verifyToken");
-
 // Using Async-Await for registration
 router.post("/register", async (req, res) => {
   const { name, email, phone, work, password, cpassword } = req.body;
